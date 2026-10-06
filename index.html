@@ -37,7 +37,7 @@ canvas{display:block;width:100%;max-width:320px;border-radius:14px;box-shadow:0 
 <button class="btn l" onclick="go('home')">← رجوع للرئيسية</button></section>
 </main>
 <script src="lib/qrcode.js"></script><script src="card-config.js"></script><script src="card.js"></script><script>
-const API = 'ضع_رابط_exec_هنا'; // الصق رابط الـ Web App بين العلامتين
+const API = 'https://script.google.com/macros/s/AKfycbwo0hulvBRSVbRGB-W08B7ssRlddgkNhrIyRkwvW_KBoYTUIAt5MQjr6C6xGSk-vMho/exec';
 const $ = id => document.getElementById(id);
 function go(v) { document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v); if (v === 'prog') { $('pform').hidden = false; $('pres').hidden = true; $('pmsg').textContent = ''; $('pid').value = localStorage.sid || ''; } scrollTo(0, 0); }
 let gender = '';
