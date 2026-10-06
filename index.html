@@ -1,0 +1,70 @@
+<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#FFF8EE"><title>روح و حياة</title>
+<style>
+:root{--b:#4F2219;--o:#DC9D5B;--c:#FFF8EE}*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-height:100vh;font-family:Tahoma,system-ui,sans-serif;color:var(--b);display:flex;justify-content:center;
+background:radial-gradient(circle at 15% 0,#FFE6C0,transparent 50%),radial-gradient(circle at 100% 100%,#F6D3A4,transparent 45%),var(--c)}
+main{width:100%;max-width:440px;padding:24px 18px 40px;text-align:center}
+.logo{width:200px;animation:fl 4s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-8px)}}
+h1{font-size:25px;margin:4px 0}.s{opacity:.7;margin:0 0 22px}
+.big{display:flex;align-items:center;gap:14px;width:100%;padding:16px;margin:12px 0;border:0;border-radius:22px;font-size:20px;font-weight:700;background:#fff;color:var(--b);box-shadow:0 8px 24px #4f221926;cursor:pointer;transition:transform .15s;font-family:inherit}
+.big:active{transform:scale(.97)}.big i{font-style:normal;font-size:28px;background:var(--o);border-radius:16px;width:56px;height:56px;display:grid;place-items:center}
+.big.p{background:var(--b);color:#fff}
+.box{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 24px #4f221926;text-align:right}
+label{font-weight:700;display:block;margin:6px 0}
+input{width:100%;padding:14px;font-size:18px;border:2px solid #f0d9bd;border-radius:14px;background:var(--c);color:var(--b);margin-bottom:12px;font-family:inherit}input:focus{outline:0;border-color:var(--o)}
+.row{display:flex;gap:10px;margin-bottom:12px}.g{flex:1;padding:14px;border:2px solid var(--o);background:#fff;border-radius:14px;font-size:19px;color:var(--b);font-family:inherit}.g.on{background:var(--o);color:#fff}
+.btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:18px;font-weight:700;background:var(--b);color:#fff;margin-top:8px;font-family:inherit}.btn.l{background:transparent;color:var(--b);border:2px solid var(--b)}.btn:disabled{opacity:.5}
+#msg,#pmsg{margin:10px 0;font-weight:700}.err{color:#b91c1c}
+canvas{width:100%;max-width:320px;border-radius:14px;box-shadow:0 6px 20px #4f22192e;margin:10px 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.st{background:var(--c);border-radius:18px;padding:16px;text-align:center}.st b{display:block;font-size:36px}.st small{opacity:.7}
+</style></head><body><main>
+<img class="logo" src="logo.png" alt="روح و حياة">
+<section class="view" id="v-home"><h1>أهلاً بيك 👋</h1><p class="s">اختار اللي محتاجه</p>
+<button class="big p" onclick="go('reg')"><i>✨</i>تسجيل جديد</button>
+<button class="big" onclick="go('prog')"><i>📈</i>متابعة التقدم</button></section>
+
+<section class="view" id="v-reg" hidden><div class="box" id="form"><label>النوع</label>
+<div class="row"><button class="g" data-g="ولد">👦 ولد</button><button class="g" data-g="بنت">👧 بنت</button></div>
+<label>الاسم ثلاثي</label><input id="name" placeholder="مثال: مينا جورج سمير" autocomplete="off" spellcheck="false">
+<button class="btn" id="go">إنشاء الكارت</button></div>
+<div id="msg"></div><div id="res" hidden><canvas id="c"></canvas><p class="s">احفظ الكارت، وهتحتاج الـ ID اللي عليه في متابعة التقدم.</p><button class="btn" id="sh">حفظ / مشاركة الكارت</button></div>
+<button class="btn l" onclick="go('home')">← رجوع للرئيسية</button></section>
+
+<section class="view" id="v-prog" hidden><div class="box" id="pform"><label>اكتب الـ ID اللي على كارتك</label>
+<input id="pid" placeholder="مثال: S012" dir="ltr" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="pgo">عرض</button></div>
+<div id="pmsg"></div>
+<div class="box" id="pres" hidden><h1 id="hi"></h1><div class="stats"><div class="st"><b id="att"></b><small>مرات الحضور</small></div><div class="st"><b id="bon"></b><small>⭐ بونص</small></div></div></div>
+<button class="btn l" onclick="go('home')">← رجوع للرئيسية</button></section>
+</main>
+<script src="lib/qrcode.js"></script><script src="card-config.js"></script><script src="card.js"></script><script>
+const API = 'ضع_رابط_exec_هنا'; // الصق رابط الـ Web App بين العلامتين
+const $ = id => document.getElementById(id);
+function go(v) { document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v); if (v === 'prog') { $('pform').hidden = false; $('pres').hidden = true; $('pmsg').textContent = ''; $('pid').value = localStorage.sid || ''; } scrollTo(0, 0); }
+let gender = '';
+document.querySelectorAll('.g').forEach(b => b.onclick = () => { gender = b.dataset.g; document.querySelectorAll('.g').forEach(x => x.classList.toggle('on', x === b)); });
+const E = { exists: 'الاسم ده مسجّل قبل كده. لو ده انت دوّر على كارتك، ولو اسمك زي حد تاني زوّد حرف أو اسم رابع.', name: 'اكتب اسمك ثلاثي واختار النوع.' };
+$('go').onclick = async () => {
+  const name = $('name').value.trim().replace(/\s+/g, ' '), m = $('msg'); m.className = '';
+  if (!gender || name.split(' ').length < 3) { m.className = 'err'; m.textContent = E.name; return; }
+  $('go').disabled = true; m.textContent = 'جاري التسجيل...';
+  try {
+    const r = await (await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ selfRegister: { name, gender } }) })).json();
+    if (r.ok) { localStorage.sid = r.id; window.cur = r; $('form').hidden = true; await drawCard($('c'), r); $('res').hidden = false; m.textContent = '✓ أهلاً ' + r.name; }
+    else { m.className = 'err'; m.textContent = E[r.error] || 'حصل خطأ، جرّب تاني'; }
+  } catch (e) { m.className = 'err'; m.textContent = 'محتاج إنترنت دلوقتي عشان التسجيل. جرّب تاني.'; }
+  $('go').disabled = false;
+};
+$('sh').onclick = () => $('c').toBlob(async b => {
+  const f = new File([b], 'qr-' + cur.name + '.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f] }); } catch (e) {} }
+  else { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = f.name; a.click(); }
+});
+$('pgo').onclick = async () => {
+  const id = $('pid').value.trim().toUpperCase(), m = $('pmsg'); if (!id) return; m.className = ''; m.textContent = 'ثواني...';
+  try {
+    const r = await (await fetch(API + '?action=progress&id=' + encodeURIComponent(id))).json();
+    if (r.ok) { localStorage.sid = id; m.textContent = ''; $('pform').hidden = true; $('hi').textContent = 'أهلاً ' + r.first + ' 👋'; $('att').textContent = r.attended + (r.total ? ' / ' + r.total : ''); $('bon').textContent = r.bonus; $('pres').hidden = false; }
+    else { m.className = 'err'; m.textContent = 'الـ ID ده مش موجود. اتأكد من الكارت.'; }
+  } catch (e) { m.className = 'err'; m.textContent = 'محتاج إنترنت. جرّب تاني.'; }
+};
+</script></body></html>
