@@ -15,7 +15,7 @@ input{width:100%;padding:14px;font-size:18px;border:2px solid #f0d9bd;border-rad
 .row{display:flex;gap:10px;margin-bottom:12px}.g{flex:1;padding:14px;border:2px solid var(--o);background:#fff;border-radius:14px;font-size:19px;color:var(--b);font-family:inherit}.g.on{background:var(--o);color:#fff}
 .btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:18px;font-weight:700;background:var(--b);color:#fff;margin-top:8px;font-family:inherit}.btn.l{background:transparent;color:var(--b);border:2px solid var(--b)}.btn:disabled{opacity:.5}
 #msg,#pmsg{margin:10px 0;font-weight:700}.err{color:#b91c1c}
-canvas{width:100%;max-width:320px;border-radius:14px;box-shadow:0 6px 20px #4f22192e;margin:10px 0}
+canvas{display:block;width:100%;max-width:320px;border-radius:14px;box-shadow:0 6px 20px #4f22192e;margin:10px auto}.row .btn{margin-top:0}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.st{background:var(--c);border-radius:18px;padding:16px;text-align:center}.st b{display:block;font-size:36px}.st small{opacity:.7}
 </style></head><body><main>
 <img class="logo" src="logo.png" alt="روح و حياة">
@@ -27,17 +27,17 @@ canvas{width:100%;max-width:320px;border-radius:14px;box-shadow:0 6px 20px #4f22
 <div class="row"><button class="g" data-g="ولد">👦 ولد</button><button class="g" data-g="بنت">👧 بنت</button></div>
 <label>الاسم ثلاثي</label><input id="name" placeholder="مثال: مينا جورج سمير" autocomplete="off" spellcheck="false">
 <button class="btn" id="go">إنشاء الكارت</button></div>
-<div id="msg"></div><div id="res" hidden><canvas id="c"></canvas><p class="s">احفظ الكارت، وهتحتاج الـ ID اللي عليه في متابعة التقدم.</p><button class="btn" id="sh">حفظ / مشاركة الكارت</button></div>
+<div id="msg"></div><div id="res" hidden><canvas id="c"></canvas><p class="s">احفظ الكارت، وهتحتاج الـ ID اللي عليه في متابعة التقدم.</p><div class="row"><button class="btn" id="dl">⬇️ تحميل الكارت</button><button class="btn" id="sh">📤 مشاركة</button></div></div>
 <button class="btn l" onclick="go('home')">← رجوع للرئيسية</button></section>
 
 <section class="view" id="v-prog" hidden><div class="box" id="pform"><label>اكتب الـ ID اللي على كارتك</label>
 <input id="pid" placeholder="مثال: S012" dir="ltr" autocapitalize="characters" autocomplete="off" spellcheck="false"><button class="btn" id="pgo">عرض</button></div>
 <div id="pmsg"></div>
-<div class="box" id="pres" hidden><h1 id="hi"></h1><div class="stats"><div class="st"><b id="att"></b><small>مرات الحضور</small></div><div class="st"><b id="bon"></b><small>⭐ بونص</small></div></div></div>
+<div id="pres" hidden><h1 id="hi"></h1><canvas id="pc"></canvas><div class="row"><button class="btn" id="pdl">⬇️ تحميل الكارت</button><button class="btn" id="psh">📤 مشاركة</button></div><div class="box" style="margin-top:14px"><div class="stats"><div class="st"><b id="att"></b><small>مرات الحضور</small></div><div class="st"><b id="bon"></b><small>⭐ بونص</small></div></div></div></div>
 <button class="btn l" onclick="go('home')">← رجوع للرئيسية</button></section>
 </main>
 <script src="lib/qrcode.js"></script><script src="card-config.js"></script><script src="card.js"></script><script>
-const API = 'https://script.google.com/macros/s/AKfycbwo0hulvBRSVbRGB-W08B7ssRlddgkNhrIyRkwvW_KBoYTUIAt5MQjr6C6xGSk-vMho/exec';
+const API = 'ضع_رابط_exec_هنا'; // الصق رابط الـ Web App بين العلامتين
 const $ = id => document.getElementById(id);
 function go(v) { document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== 'v-' + v); if (v === 'prog') { $('pform').hidden = false; $('pres').hidden = true; $('pmsg').textContent = ''; $('pid').value = localStorage.sid || ''; } scrollTo(0, 0); }
 let gender = '';
@@ -54,16 +54,19 @@ $('go').onclick = async () => {
   } catch (e) { m.className = 'err'; m.textContent = 'محتاج إنترنت دلوقتي عشان التسجيل. جرّب تاني.'; }
   $('go').disabled = false;
 };
-$('sh').onclick = () => $('c').toBlob(async b => {
-  const f = new File([b], 'qr-' + cur.name + '.png', { type: 'image/png' });
-  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f] }); } catch (e) {} }
-  else { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = f.name; a.click(); }
+let pcur = null;
+const saveCard = (c, name) => c.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'روح و حياة - ' + name.replace(/[\\/:*?"<>|]/g, '') + '.png'; a.click(); });
+const shareCard = (c, name) => c.toBlob(async b => {
+  const f = new File([b], 'card.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f] }); } catch (e) {} } else saveCard(c, name);
 });
+$('dl').onclick = () => saveCard($('c'), cur.name); $('sh').onclick = () => shareCard($('c'), cur.name);
+$('pdl').onclick = () => saveCard($('pc'), pcur.name); $('psh').onclick = () => shareCard($('pc'), pcur.name);
 $('pgo').onclick = async () => {
   const id = $('pid').value.trim().toUpperCase(), m = $('pmsg'); if (!id) return; m.className = ''; m.textContent = 'ثواني...';
   try {
     const r = await (await fetch(API + '?action=progress&id=' + encodeURIComponent(id))).json();
-    if (r.ok) { localStorage.sid = id; m.textContent = ''; $('pform').hidden = true; $('hi').textContent = 'أهلاً ' + r.first + ' 👋'; $('att').textContent = r.attended + (r.total ? ' / ' + r.total : ''); $('bon').textContent = r.bonus; $('pres').hidden = false; }
+    if (r.ok) { localStorage.sid = id; m.textContent = ''; $('pform').hidden = true; $('hi').textContent = 'أهلاً ' + r.first + ' 👋'; pcur = { id, name: r.name || r.first }; await drawCard($('pc'), pcur); $('att').textContent = r.attended + (r.total ? ' / ' + r.total : ''); $('bon').textContent = r.bonus; $('pres').hidden = false; }
     else { m.className = 'err'; m.textContent = 'الـ ID ده مش موجود. اتأكد من الكارت.'; }
   } catch (e) { m.className = 'err'; m.textContent = 'محتاج إنترنت. جرّب تاني.'; }
 };
